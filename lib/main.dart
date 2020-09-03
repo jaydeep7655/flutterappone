@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
 
@@ -25,13 +28,63 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   TabController tb;
   int hour = 0;
-  String timeToDisplay="";
+  int min = 0;
+  int sec = 0;
+  String timeToDisplay = "";
+  bool started = true;
+  bool stopped = true;
+  int timefortimer;
+  bool cancelTimer = false;
+  final dur = const Duration(seconds: 1);
 
   @override
   void initState() {
     // TODO: implement initState
     tb = TabController(length: 2, vsync: this);
     super.initState();
+  }
+
+  void start() {
+    setState(() {
+      started = false;
+      stopped = false;
+    });
+    timefortimer = ((hour * 3600) + (min * 60) + sec);
+    Timer.periodic(dur, (Timer t) {
+      setState(() {
+        if (timefortimer < 1 || cancelTimer == true) {
+          t.cancel();
+          Navigator.pushReplacement(context, MaterialPageRoute(
+            builder: (context) => HomePage(),
+          ));
+        } else if (timefortimer < 60) {
+          timeToDisplay = timefortimer.toString();
+          timefortimer = timefortimer - 1;
+        } else if (timefortimer < 3600) {
+          int m = timefortimer ~/ 60;
+          int s = timefortimer - (60 * m);
+          timeToDisplay = m.toString() + ":" + s.toString();
+          timefortimer = timefortimer - 1;
+        } else {
+          int h = timefortimer ~/ 3600;
+          int t = timefortimer - (3600 * h);
+          int m = t ~/ 60;
+          int s = t - (60 * m);
+          timeToDisplay =
+              h.toString() + ":" + m.toString() + ":" + s.toString();
+          timefortimer = timefortimer - 1;
+        }
+      });
+    });
+  }
+
+  void stop() {
+    setState(() {
+      started = true;
+      stopped = true;
+      cancelTimer = true;
+      timeToDisplay = "";
+    });
   }
 
   Widget timer() {
@@ -81,13 +134,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                     ),
                     NumberPicker.integer(
-                        initialValue: hour,
+                        initialValue: min,
                         minValue: 0,
                         listViewWidth: 60.0,
                         maxValue: 23,
                         onChanged: (val) {
                           setState(() {
-                            hour = val;
+                            min = val;
                           });
                         })
                   ],
@@ -105,13 +158,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                     ),
                     NumberPicker.integer(
-                        initialValue: hour,
+                        initialValue: sec,
                         minValue: 0,
                         listViewWidth: 60.0,
                         maxValue: 23,
                         onChanged: (val) {
                           setState(() {
-                            hour = val;
+                            sec = val;
                           });
                         })
                   ],
@@ -121,7 +174,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
           Expanded(
             flex: 1,
-            child: Text(timeToDisplay),
+            child: Text(
+              timeToDisplay,
+              style: TextStyle(fontSize: 40.0, fontWeight: FontWeight.w700),
+            ),
           ),
           Expanded(
               flex: 3,
@@ -129,7 +185,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   RaisedButton(
-                    onPressed: () {},
+                    onPressed: started ? start : null,
                     color: Colors.green,
                     padding: EdgeInsets.symmetric(
                       horizontal: 35.0,
@@ -144,7 +200,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                   ),
                   RaisedButton(
-                    onPressed: () {},
+                    onPressed: stopped ? null : stop,
                     color: Colors.green,
                     padding: EdgeInsets.symmetric(
                       horizontal: 35.0,
