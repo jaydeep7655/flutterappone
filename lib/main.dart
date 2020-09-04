@@ -54,9 +54,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       setState(() {
         if (timefortimer < 1 || cancelTimer == true) {
           t.cancel();
-          Navigator.pushReplacement(context, MaterialPageRoute(
-            builder: (context) => HomePage(),
-          ));
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomePage(),
+              ));
         } else if (timefortimer < 60) {
           timeToDisplay = timefortimer.toString();
           timefortimer = timefortimer - 1;
@@ -221,6 +223,148 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
+  //===========================================================
+  //===========================================================
+  //===========================================================
+  //                  the stopWatch Code
+  //===========================================================
+  //===========================================================
+  //===========================================================
+
+  bool startisPressed = true;
+  bool stopisPressed = true;
+  bool resetisPressed = true;
+
+  String stoptimetodisplay = "00:00:00";
+  var swatch = Stopwatch();
+  final dur1 = const Duration(seconds: 1);
+
+
+  void startTimer() {
+  Timer(dur,keeprunning);
+  }
+
+  void keeprunning(){
+    if(swatch.isRunning){
+      startTimer();
+    }
+    setState(() {
+      stoptimetodisplay = swatch.elapsed.inHours.toString().padLeft(2,"0") + ":"
+      + (swatch.elapsed.inMinutes % 60).toString().padLeft(2,"0") + ":" +
+          (swatch.elapsed.inSeconds % 60).toString().padLeft(2,"0");
+
+    });
+
+  }
+
+  void startstopwatch() {
+    setState(() {
+      stopisPressed = false;
+      startisPressed=false;
+    });
+    swatch.start();
+    startTimer();
+  }
+
+  void stopstopwatch() {
+    setState(() {
+      stopisPressed=true;
+      resetisPressed=false;
+    });
+    swatch.stop();
+
+  }
+
+  void resetstopwatch() {
+    setState(() {
+      startisPressed= true ;
+      resetisPressed =true;
+    });
+    swatch.reset();
+    stoptimetodisplay = "00:00:00";
+  }
+
+  Widget stopWatch() {
+    return Container(
+      child: Column(
+        children: <Widget>[
+          Expanded(
+            flex: 6,
+            child: Container(
+              alignment: Alignment.center,
+              child: Text(
+                stoptimetodisplay,
+                style: TextStyle(
+                  fontSize: 50.0,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: Container(
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        RaisedButton(
+                          onPressed: stopisPressed ? null : stopstopwatch,
+                          color: Colors.red,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 40.0,
+                            vertical: 15.0,
+                          ),
+                          child: Text(
+                            "Stop",
+                            style: TextStyle(
+                                fontSize: 20.0,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        RaisedButton(
+                          onPressed: resetisPressed ? null : resetstopwatch,
+                          color: Colors.teal,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 40.0,
+                            vertical: 15.0,
+                          ),
+                          child: Text(
+                            "Reset",
+                            style: TextStyle(
+                                fontSize: 20.0,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        )
+                      ],
+                    ),
+                    RaisedButton(
+                      onPressed: startisPressed ? startstopwatch : null,
+                      color: Colors.green,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 80.0,
+                        vertical: 20.0,
+                      ),
+                      child: Text(
+                        "Start",
+                        style: TextStyle(
+                            fontSize: 24.0,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    )
+                  ]),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -240,7 +384,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       body: TabBarView(
         children: <Widget>[
           timer(),
-          Text("StopWatch"),
+          stopWatch(),
         ],
         controller: tb,
       ),
